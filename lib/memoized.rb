@@ -11,10 +11,14 @@
 #++
 
 class Class
+  alias __old_memoized_method_added method_added
+
   def method_added (name)
     if @__to_memoize__
       memoize(name)
     end
+
+    __old_memoized_method_added(name)
   end
 end
 
