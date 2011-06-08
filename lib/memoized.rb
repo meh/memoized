@@ -11,14 +11,14 @@
 #++
 
 class Class
-  alias __old_memoized_method_added method_added
+  old = self.instance_method(:method_added)
 
-  def method_added (name)
+  define_method(:method_added) do |*args|
     if @__to_memoize__
-      memoize(name)
+      memoize(args.first)
     end
 
-    __old_memoized_method_added(name)
+    old.bind(self).call(*args)
   end
 end
 
@@ -26,11 +26,11 @@ class Object
   # Memoize the method +name+. If +file+ is provided, then the method results
   # are stored on disk as well as in memory.
   def memoize (name=nil)
-    if !name
+    if name
+      @__to_memoize__ = false
+    else
       return @__to_memoize__ = true
     end
-    
-    @__to_memoize__ = false
 
     name = name.to_sym
     meth = self.instance_method(name)
@@ -51,5 +51,5 @@ class Object
 
   def memoized_cache
     @__memoized_cache__ ||= {}
-  end
+  end; alias memoize_cache memoized_cache
 end
