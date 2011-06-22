@@ -36,7 +36,11 @@ class Object
     meth = self.instance_method(name)
 
     define_method name do |*args|
-      memoized_cache[[name] + [args]] ||= meth.bind(self).call(*args)
+      if tmp = memoized_cache[[name] + [args]]
+        tmp
+      else
+        memoized_cache[[name] + [__try_to_clone(args)]] = meth.bind(self).call(*args)
+      end
     end
   end
 
@@ -52,4 +56,9 @@ class Object
   def memoized_cache
     @__memoized_cache__ ||= {}
   end; alias memoize_cache memoized_cache
+
+  private
+    def __try_to_clone (value)
+      Marshal.load(Marshal.dump(value)) rescue value
+    end
 end
