@@ -25,7 +25,7 @@ p.memoized_cache # this will return the cache (which is a simple Hash)
 
 Memoizing already present classes from others code:
 
-```
+```ruby
 class Shortie::Service
   class << self
     memoize :find_by_key
