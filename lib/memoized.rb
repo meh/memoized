@@ -23,13 +23,18 @@ end
 class Object
   # Memoize the method +name+.
   def memoized (name=nil)
-    return if @__to_memoize = !name
+    return if @__to_memoize__ = !name
 
     name = name.to_sym
     meth = self.instance_method(name)
 
     define_method name do |*args, &block|
-      memoized_cache[name][args + [block]] or memoized_cache[name][__memoized_try_to_clone__(args) + [block]] = meth.bind(self).call(*args, &block)
+      if memoized_cache[name].has_key?(args + [block])
+        memoized_cache[name][args + [block]]
+      else
+        memoized_cache[name][__memoized_try_to_clone__(args) + [block]] =
+          meth.bind(self).call(*args, &block)
+      end
     end
   end; alias memoize memoized
 

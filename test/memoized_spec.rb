@@ -2,7 +2,7 @@
 require 'rubygems'
 require 'memoized'
 
-describe 'Memoized' do
+describe 'memoize' do
   before do
     @spec = Class.new {
       memoize
@@ -15,6 +15,6 @@ describe 'Memoized' do
   it 'caches correctly' do
     @spec.ruby_version
 
-    @spec.memoized_cache[[:ruby_version, []]].should === @spec.ruby_version
+    @spec.memoized_cache[:ruby_version][[nil]].should === @spec.ruby_version
   end
 end
