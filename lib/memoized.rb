@@ -14,38 +14,27 @@ class Class
   old = self.instance_method(:method_added)
 
   define_method(:method_added) do |*args|
-    if @__to_memoize__
-      memoized(args.first)
-    end
+    memoized(args.first) if @__to_memoize__
 
     old.bind(self).call(*args)
   end
 end
 
 class Object
-  # Memoize the method +name+. If +file+ is provided, then the method results
-  # are stored on disk as well as in memory.
+  # Memoize the method +name+.
   def memoized (name=nil)
-    if name
-      @__to_memoize__ = false
-    else
-      return @__to_memoize__ = true
-    end
+    return if @__to_memoize = !name
 
     name = name.to_sym
     meth = self.instance_method(name)
 
-    define_method name do |*args|
-      if tmp = memoized_cache[[name] + [args]]
-        tmp
-      else
-        memoized_cache[[name] + [__memoized_try_to_clone__(args)]] = meth.bind(self).call(*args)
-      end
+    define_method name do |*args, &block|
+      memoized_cache[name][args + [block]] or memoized_cache[name][__memoized_try_to_clone__(args) + [block]] = meth.bind(self).call(*args, &block)
     end
   end; alias memoize memoized
 
   # Clear the memoized cache completely or only for the method +name+
-  def memoized_clear (name=nil, file=nil)
+  def memoized_clear (name=nil)
     if name
       memoized_cache.delete(name.to_sym)
     else
@@ -53,12 +42,15 @@ class Object
     end
   end; alias memoize_clear memoized_clear
 
+  # Get the memoization cache
   def memoized_cache
-    @__memoized_cache__ ||= {}
+    @__memoized_cache__ ||= Hash.new {|hash, key|
+      hash[key] = {}
+    }
   end; alias memoize_cache memoized_cache
 
   private
-    def __memoized_try_to_clone__ (value)
+    def __memoized_try_to_clone__ (value) # :nodoc:
       Marshal.load(Marshal.dump(value)) rescue value
     end
 end
