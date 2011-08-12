@@ -8,4 +8,6 @@ Gem::Specification.new {|s|
     s.summary      = 'A simple library to memoize methods.'
     s.files        = Dir.glob('lib/**/*.rb')
     s.require_path = 'lib'
+
+    s.add_dependency 'refining'
 }

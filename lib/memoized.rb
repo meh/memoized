@@ -10,13 +10,13 @@
 # 0. You just DO WHAT THE FUCK YOU WANT TO.
 #++
 
-class Class
-  old = self.instance_method(:method_added)
+require 'refining'
 
-  define_method(:method_added) do |*args|
+class Class
+  refine_method :method_added do |old, *args|
     memoized(args.first) if @__to_memoize__
 
-    old.bind(self).call(*args)
+    old.call(*args)
   end
 end
 
@@ -25,15 +25,11 @@ class Object
   def memoized (name=nil)
     return if @__to_memoize__ = !name
 
-    name = name.to_sym
-    meth = self.instance_method(name)
-
-    define_method name do |*args, &block|
+    refine_method name do |old, *args, &block|
       if memoized_cache[name].has_key?(args + [block])
         memoized_cache[name][args + [block]]
       else
-        memoized_cache[name][__memoized_try_to_clone__(args) + [block]] =
-          meth.bind(self).call(*args, &block)
+        memoized_cache[name][__memoized_try_to_clone__(args) + [block]] = old.call(*args, &block)
       end
     end
   end; alias memoize memoized
