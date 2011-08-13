@@ -3,7 +3,7 @@ require 'rubygems'
 require 'memoized'
 
 describe 'memoize' do
-  before do
+  let(:test) do
     @spec = Class.new {
       memoize
       def ruby_version
@@ -13,8 +13,8 @@ describe 'memoize' do
   end
 
   it 'caches correctly' do
-    @spec.ruby_version
+    test.ruby_version
 
-    @spec.memoized_cache[:ruby_version][[nil]].should === @spec.ruby_version
+    test.memoized_cache[:ruby_version][[]].should === test.ruby_version
   end
 end

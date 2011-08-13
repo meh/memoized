@@ -25,11 +25,11 @@ class Object
   def memoized (name=nil)
     return if @__to_memoize__ = !name
 
-    refine_method name do |old, *args, &block|
-      if memoized_cache[name].has_key?(args + [block])
-        memoized_cache[name][args + [block]]
+    refine_method name do |old, *args|
+      if memoized_cache[name].has_key?(args)
+        memoized_cache[name][args]
       else
-        memoized_cache[name][__memoized_try_to_clone__(args) + [block]] = old.call(*args, &block)
+        memoized_cache[name][__memoized_try_to_clone__(args)] = old.call(*args)
       end
     end
   end; alias memoize memoized
@@ -52,6 +52,10 @@ class Object
 
   private
     def __memoized_try_to_clone__ (value) # :nodoc:
-      Marshal.load(Marshal.dump(value)) rescue value
+      begin
+        Marshal.load(Marshal.dump(value))
+      rescue Exception
+        value
+      end
     end
 end
