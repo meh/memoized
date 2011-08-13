@@ -23,7 +23,16 @@ end
 class Object
   # Memoize the method +name+.
   def memoized (name=nil)
-    return if @__to_memoize__ = !name
+    if name.nil?
+      # XXX: this could break, keep an eye out for breakages caused by the check
+      (to_s =~ /#<Class:|main/ ? self.class : self).instance_eval {
+        @__to_memoize__ = true
+      }
+
+      return
+    else
+      @__to_memoize__ = false
+    end
 
     refine_method name do |old, *args|
       if memoized_cache[name].has_key?(args)
