@@ -12,7 +12,7 @@
 
 require 'refining'
 
-class Class
+class Module
   refine_method :method_added do |old, *args|
     memoized(args.first) if @__to_memoize__
 
