@@ -13,26 +13,23 @@
 require 'refining'
 
 class Module
-  refine_method :method_added do |old, *args|
-    memoized(args.first) if @__to_memoize__
+  refine_method :method_added do |old, name|
+    memoized(name) if @__to_memoize__
 
-    old.call(*args)
+    old.call(name)
+  end
+
+  refine_method :singleton_method_added do |old, name|
+    singleton_memoized(name) if @@__to_memoize__
+
+    old.call(name)
   end
 end
 
 class Object
   # Memoize the method +name+.
   def memoized (name=nil)
-    if name.nil?
-      # XXX: this could break, keep an eye out for breakages caused by the check
-      (to_s =~ /#<Class:|main/ ? self.class : self).instance_eval {
-        @__to_memoize__ = true
-      }
-
-      return
-    else
-      @__to_memoize__ = false
-    end
+    return if @__to_memoize__ = !name
 
     refine_method name do |old, *args|
       if memoized_cache[name].has_key?(args)
@@ -41,7 +38,24 @@ class Object
         memoized_cache[name][__memoized_try_to_clone__(args)] = old.call(*args)
       end
     end
+
+    nil
   end; alias memoize memoized
+
+  # Memoize the singleton method +name+.
+  def singleton_memoized (name=nil)
+    return if @@__to_memoize__ = !name
+
+    refine_singleton_method name do |old, *args|
+      if memoized_cache[name].has_key?(args)
+        memoized_cache[name][args]
+      else
+        memoized_cache[name][__memoized_try_to_clone__(args)] = old.call(*args)
+      end
+    end
+
+    nil
+  end; alias singleton_memoize singleton_memoized
 
   # Clear the memoized cache completely or only for the method +name+
   def memoized_clear (name=nil)
