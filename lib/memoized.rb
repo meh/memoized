@@ -20,7 +20,7 @@ class Module
   end
 
   refine_method :singleton_method_added do |old, name|
-    singleton_memoized(name) if @@__to_memoize__
+    singleton_memoized(name) if defined?(@@__to_memoize__) && @@__to_memoize__
 
     old.call(name)
   end
@@ -44,7 +44,7 @@ class Object
 
   # Memoize the singleton method +name+.
   def singleton_memoized (name=nil)
-    return if @@__to_memoize__ = !name
+    return if defined?(@@__to_memoize__) && @@__to_memoize__ = !name
 
     refine_singleton_method name do |old, *args|
       if memoized_cache[name].has_key?(args)
