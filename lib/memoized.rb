@@ -44,7 +44,7 @@ class Object
 
   # Memoize the singleton method +name+.
   def singleton_memoized (name=nil)
-    return if defined?(@@__to_memoize__) && @@__to_memoize__ = !name
+    return if name.nil? || defined?(@@__to_memoize__) && @@__to_memoize__ = !name
 
     refine_singleton_method name do |old, *args|
       if memoized_cache[name].has_key?(args)
