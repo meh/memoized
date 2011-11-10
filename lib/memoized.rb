@@ -13,16 +13,20 @@
 require 'refining'
 
 class Module
-	refine_method :method_added do |old, name|
+	refine_method :method_added, prefix: '__memoized' do |name|
+		next if name == 'temporary method for refining'
+
 		memoized(name) if @__to_memoize__
 
-		old.call(name)
+		__memoized_method_added(name)
 	end
 
-	refine_method :singleton_method_added do |old, name|
+	refine_method :singleton_method_added, prefix: '__memoized' do |name|
+		next if name == 'temporary method for refining'
+
 		singleton_memoized(name) if @__to_singleton_memoize__
 
-		old.call(name)
+		__memoized_singleton_method_added(name)
 	end
 end
 
@@ -31,11 +35,25 @@ class Object
 	def memoized (name = nil)
 		return if @__to_memoize__ = !name
 
-		refine_method name do |old, *args|
+		to_call = "__memoized_#{name}"
+
+		begin; if method(name).arity == 0
+			refine_method name do |old|
+				raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
+
+				memoized_cache[name] ||= __send__ to_call
+			end
+
+			return
+		end; rescue; end
+
+		refine_method name, prefix: '__memoized' do |*args|
+			raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
+
 			if memoized_cache[name].has_key?(args)
 				memoized_cache[name][args]
 			else
-				memoized_cache[name][__memoized_try_to_clone__(args)] = old.call(*args)
+				memoized_cache[name][__memoized_try_to_clone__(args)] = __send__ to_call, *args
 			end
 		end
 
@@ -46,11 +64,25 @@ class Object
 	def singleton_memoized (name = nil)
 		return if @__to_singleton_memoize__ = !name
 
-		refine_singleton_method name do |old, *args|
+		to_call = "__memoized_#{name}"
+
+		begin; if method(name).arity == 0
+			refine_singleton_method name, prefix: '__memoized' do
+				raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
+
+				memoized_cache[name] ||= __send__ name
+			end
+
+			return
+		end; rescue; end
+
+		refine_singleton_method name, prefix: '__memoized' do |*args, &block|
+			raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
+
 			if memoized_cache[name].has_key?(args)
 				memoized_cache[name][args]
 			else
-				memoized_cache[name][__memoized_try_to_clone__(args)] = old.call(*args)
+				memoized_cache[name][__memoized_try_to_clone__(args)] = __send__ to_call, *args
 			end
 		end
 
