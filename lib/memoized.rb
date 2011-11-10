@@ -13,7 +13,7 @@
 require 'refining'
 
 class Module
-	refine_method :method_added, prefix: '__memoized' do |name|
+	refine_method :method_added, :prefix => '__memoized' do |name|
 		next if name == 'temporary method for refining'
 
 		memoized(name) if @__to_memoize__
@@ -21,7 +21,7 @@ class Module
 		__memoized_method_added(name)
 	end
 
-	refine_method :singleton_method_added, prefix: '__memoized' do |name|
+	refine_method :singleton_method_added, :prefix => '__memoized' do |name|
 		next if name == 'temporary method for refining'
 
 		singleton_memoized(name) if @__to_singleton_memoize__
@@ -37,7 +37,7 @@ class Object
 
 		to_call = "__memoized_#{name}"
 
-		begin; if method(name).arity == 0
+		begin; if instance_method(name).arity == 0
 			refine_method name do |old|
 				raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
 
@@ -47,7 +47,7 @@ class Object
 			return
 		end; rescue; end
 
-		refine_method name, prefix: '__memoized' do |*args|
+		refine_method name, :prefix => '__memoized' do |*args|
 			raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
 
 			if memoized_cache[name].has_key?(args)
@@ -67,7 +67,7 @@ class Object
 		to_call = "__memoized_#{name}"
 
 		begin; if method(name).arity == 0
-			refine_singleton_method name, prefix: '__memoized' do
+			refine_singleton_method name, :prefix => '__memoized' do
 				raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
 
 				memoized_cache[name] ||= __send__ name
@@ -76,13 +76,13 @@ class Object
 			return
 		end; rescue; end
 
-		refine_singleton_method name, prefix: '__memoized' do |*args, &block|
+		refine_singleton_method name, :prefix => '__memoized' do |*args, &block|
 			raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
 
 			if memoized_cache[name].has_key?(args)
 				memoized_cache[name][args]
 			else
-				memoized_cache[name][__memoized_try_to_clone__(args)] = __send__ to_call, *args
+				memoized_cache[name][__memoized_try_to_clone__(args)] = __send__ *([to_call] + args)
 			end
 		end
 
