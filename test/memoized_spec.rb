@@ -37,9 +37,9 @@ describe 'memoize' do
 		end
 
 		it 'correctly cache methods with arguments' do
-			LOL.add 2, 2
+			LOL.add(2, 2).should == 4
 
-			LOL.memoized_cache[:add][[2, 2]][0].should === LOL.add(2, 2)
+			LOL.memoized_cache[:add][[2, 2]][0].should === 4
 		end
 	end
 
@@ -51,10 +51,9 @@ describe 'memoize' do
 		end
 
 		it 'correctly cache methods with arguments' do
-			test.add 2, 2
+			test.add(2, 2).should == 4
 
-			test.memoized_cache[:add][[2, 2]][0].should == test.add(2, 2)
+			test.memoized_cache[:add][[2, 2]][0].should == 4
 		end
-
 	end
 end

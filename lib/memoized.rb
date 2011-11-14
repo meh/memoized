@@ -49,7 +49,7 @@ class Object
 			if tmp = memoized_cache[name][args]
 				tmp[0]
 			else
-				memoized_cache[name][__memoized_try_to_clone__(args)] = [__send__(*([to_call] + args))]
+				(memoized_cache[name][__memoized_try_to_clone__(args)] = [__send__(*([to_call] + args))])[0]
 			end
 		end
 
@@ -74,7 +74,7 @@ class Object
 			if tmp = memoized_cache[name][args]
 				tmp[0]
 			else
-				memoized_cache[name][__memoized_try_to_clone__(args)] = [__send__(*([to_call] + args))]
+				(memoized_cache[name][__memoized_try_to_clone__(args)] = [__send__(*([to_call] + args))])[0]
 			end
 		end
 
