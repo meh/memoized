@@ -50,10 +50,10 @@ class Object
 		refine_method name, :prefix => '__memoized' do |*args|
 			raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
 
-			if memoized_cache[name].has_key?(args)
-				memoized_cache[name][args]
+			if tmp = memoized_cache[name][args]
+				tmp[0]
 			else
-				memoized_cache[name][__memoized_try_to_clone__(args)] = __send__ to_call, *args
+				memoized_cache[name][__memoized_try_to_clone__(args)] = [__send__(*([to_call] + args))]
 			end
 		end
 
@@ -79,10 +79,10 @@ class Object
 		refine_singleton_method name, :prefix => '__memoized' do |*args, &block|
 			raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
 
-			if memoized_cache[name].has_key?(args)
-				memoized_cache[name][args]
+			if tmp = memoized_cache[name][args]
+				tmp[0]
 			else
-				memoized_cache[name][__memoized_try_to_clone__(args)] = __send__ *([to_call] + args)
+				memoized_cache[name][__memoized_try_to_clone__(args)] = [__send__(*([to_call] + args))]
 			end
 		end
 
