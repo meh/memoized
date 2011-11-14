@@ -38,18 +38,14 @@ class Object
 		to_call = "__memoized_#{name}"
 
 		begin; if instance_method(name).arity == 0
-			refine_method name do |old|
-				raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
-
-				memoized_cache[name] ||= __send__ to_call
+			refine_method name, :prefix => '__memoized' do
+				(memoized_cache[name][nil] ||= [__send__(to_call)])[0]
 			end
 
 			return
 		end; rescue; end
 
 		refine_method name, :prefix => '__memoized' do |*args|
-			raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
-
 			if tmp = memoized_cache[name][args]
 				tmp[0]
 			else
@@ -68,17 +64,13 @@ class Object
 
 		begin; if method(name).arity == 0
 			refine_singleton_method name, :prefix => '__memoized' do
-				raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
-
-				memoized_cache[name] ||= __send__ name
+				(memoized_cache[name][nil] ||= [__send__(to_call)])[0]
 			end
 
 			return
 		end; rescue; end
 
 		refine_singleton_method name, :prefix => '__memoized' do |*args, &block|
-			raise ArgumentError, 'you cannot memoize methods that get a block as argument' if block_given?
-
 			if tmp = memoized_cache[name][args]
 				tmp[0]
 			else

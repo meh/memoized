@@ -33,13 +33,13 @@ describe 'memoize' do
 		it 'correctly caches methods with no argument' do
 			LOL.ruby_version
 
-			LOL.memoized_cache[:ruby_version].should == LOL.ruby_version
+			LOL.memoized_cache[:ruby_version][nil][0].should === LOL.ruby_version
 		end
 
 		it 'correctly cache methods with arguments' do
 			LOL.add 2, 2
 
-			LOL.memoized_cache[:add][[2, 2]].should == [LOL.add(2, 2)]
+			LOL.memoized_cache[:add][[2, 2]][0].should === LOL.add(2, 2)
 		end
 	end
 
@@ -47,13 +47,13 @@ describe 'memoize' do
 		it 'correctly caches methods with no argument' do
 			test.ruby_version
 
-			test.memoized_cache[:ruby_version].should == test.ruby_version
+			test.memoized_cache[:ruby_version][nil][0].should === test.ruby_version
 		end
 
 		it 'correctly cache methods with arguments' do
 			test.add 2, 2
 
-			test.memoized_cache[:add][[2, 2]].should == [test.add(2, 2)]
+			test.memoized_cache[:add][[2, 2]][0].should == test.add(2, 2)
 		end
 
 	end
