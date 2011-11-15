@@ -47,10 +47,10 @@ class Object
 
 		refine_method name, :prefix => '__memoized' do |*args|
 			if tmp = memoized_cache[name][args]
-				tmp[0]
+				tmp
 			else
-				(memoized_cache[name][__memoized_try_to_clone__(args)] = [__send__(*([to_call] + args))])[0]
-			end
+				memoized_cache[name][__memoized_try_to_clone__(args)] = [__send__(*([to_call] + args))]
+			end[0]
 		end
 
 		nil
@@ -72,10 +72,10 @@ class Object
 
 		refine_singleton_method name, :prefix => '__memoized' do |*args, &block|
 			if tmp = memoized_cache[name][args]
-				tmp[0]
+				tmp
 			else
-				(memoized_cache[name][__memoized_try_to_clone__(args)] = [__send__(*([to_call] + args))])[0]
-			end
+				memoized_cache[name][__memoized_try_to_clone__(args)] = [__send__(*([to_call] + args))]
+			end[0]
 		end
 
 		nil
