@@ -1,6 +1,8 @@
 memoized
 ========
 
+**GEM MERGED INTO CALL-ME, THIS IS UNMAINTAINED NOW: https://github.com/meh/ruby-call-me**
+
 I wasn't completely happy with the actual memoization gems so I made one myself.
 
 ```ruby
